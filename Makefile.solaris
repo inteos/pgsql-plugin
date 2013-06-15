@@ -1,0 +1,62 @@
+#
+# Makefile for inteos-pgsql-plugin on Solaris
+#
+
+# Flags & libs
+BACULASRC = bacula.enterprise.git
+BACULAVERSION = $(shell grep VERSION= ../$(BACULASRC)/bacula/Makefile|cut -f2 -d'=')
+PGSQLVERSION = $(shell grep PLUGIN_VERSION pgsql-fd.c|grep define|awk '{print $$3}')
+
+plugindir = /opt/local/bacula/plugins
+sbindir = /opt/local/bacula/sbin
+libdir = /opt/local/bacula/lib64
+confdir = /opt/local/bacula/etc
+
+CFLAGS = -g -Wall -fno-strict-aliasing -fno-exceptions -fPIC
+CPPFLAGS = -g -fno-strict-aliasing -fno-exceptions -fno-rtti -Wall -fPIC
+LDFLAGS = -L/opt/local/lib -lintl
+BACULA_H = -I../$(BACULASRC)/bacula/src -I../$(BACULASRC)/bacula/src/filed -I/opt/local/include
+DB_H = -I../postgres/9.1-pgdg/include
+BACULA_LIBS = -L../$(BACULASRC)/bacula/src/lib/.libs -lbac -lsocket
+DB_LIBS = -L../postgres/9.1-pgdg/lib -lpq -lcrypt
+
+PGSQLSRC = pgsql-fd.c pgsql-archlog.c pgsql-restore.c pgsqllib.c
+PGSQLOBJ = $(PGSQLSRC:.c=.o)
+BACSRC = keylist.c parseconfig.c pluglib.c utils.c
+BACOBJ = $(BACSRC:.c=.lo)
+
+all: pgsql Makefile
+
+clean: libtool-clean pgsql-clean
+	@echo "Cleaning obects ..."
+	@rm -f *.o
+
+%.o : %.c
+	@echo "Compiling $@ ..."
+	@g++ $(CPPFLAGS) $(BACULA_H) -c $< -o $@
+
+pgsql: Makefile pgsql-fd.so pgsql-archlog pgsql-restore
+
+$(PGSQLOBJ): Makefile
+	@echo "Compiling PG $(@:.o=.c) ..."
+	@g++ $(CPPFLAGS) $(BACULA_H) $(DB_H) -c $(@:.o=.c) -o $@
+
+pgsql-fd.so: pgsql-fd.o parseconfig.o keylist.o pluglib.o utils.o
+	@echo "Building $@ ..."
+	@g++ -shared $^ -o $@ -Wl,-soname,$@ -module $(DB_LIBS) $(BACULA_LIBS)
+
+pgsql-archlog: pgsql-archlog.o parseconfig.o keylist.o pgsqllib.o pluglib.o utils.o
+	@echo "Making $@ ..."
+	@g++ -o $@ $^ $(BACULA_LIBS) $(DB_LIBS)
+
+pgsql-restore: pgsql-restore.o parseconfig.o keylist.o pgsqllib.o pluglib.o utils.o
+	@echo "Making $@ ..."
+	g++ -o $@ $^ $(BACULA_LIBS) $(DB_LIBS)
+
+pgsql-clean:
+	@echo "Cleaning pgsql ..."
+	@rm -f pgsql-archlog pgsql-restore pgsql-fd.so
+
+install: pgsql-fd.so
+	@echo "Installing plugin ... $^"
+	@cp $^ $(plugindir)

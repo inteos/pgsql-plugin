@@ -11,3 +11,8 @@
 *.lai
 *.la
 *.a
+
+pgsql-archlog
+pgsql-restore
+Makefile
+.libs

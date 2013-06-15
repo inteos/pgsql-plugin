@@ -1,0 +1,87 @@
+#
+# Makefile for inteos-pgsql-plugin on MacOSX
+#
+
+# Flags & libs
+BACULASRC = bacula.enterprise.git
+BACULAVERSION = $(shell grep VERSION= ../$(BACULASRC)/bacula/Makefile|cut -f2 -d'=')
+PGSQLVERSION = $(shell grep PLUGIN_VERSION pgsql-fd.c|grep define|awk '{print $$3}')
+
+plugindir = /opt/local/bacula/plugins
+sbindir = /opt/local/bacula/sbin
+libdir = /opt/local/bacula/lib64
+confdir = /opt/local/bacula/etc
+
+CFLAGS = -g -Wall -fno-strict-aliasing -fno-exceptions -fPIC
+CPPFLAGS = -g -fno-strict-aliasing -fno-exceptions -fno-rtti -Wall -fPIC
+LDFLAGS = -L/opt/local/lib -lintl
+BACULA_H = -I../$(BACULASRC)/bacula/src -I../$(BACULASRC)/bacula/src/filed -I/opt/local/include
+DB_H = -I/opt/local/include/postgresql90
+BACULA_LIBS = -L../$(BACULASRC)/bacula/src/lib/.libs -lbac
+DB_LIBS = -L/usr/lib -L/opt/local/lib/postgresql90 -lpq -lcrypto
+
+PGSQLSRC = pgsql-fd.c pgsql-archlog.c pgsql-restore.c pgsqllib.c
+PGSQLOBJ = $(PGSQLSRC:.c=.lo)
+BACSRC = keylist.c parseconfig.c pluglib.c utils.c
+BACOBJ = $(BACSRC:.c=.lo)
+
+all: pgsql Makefile
+
+clean: libtool-clean pgsql-clean
+	@echo "Cleaning obects ..."
+	@rm -f *.o *.lo *.dylib
+
+%.lo : %.c Makefile
+	@echo "Compiling $(@:.lo=.c) ..."
+	@glibtool --silent --tag=CXX --mode=compile g++ $(CPPFLAGS) -c $(@:.lo=.c)
+
+$(BACOBJ): Makefile $(BACSRC)
+	@echo "Compiling BAClib required $(@:.lo=.c) ..."
+	@glibtool --silent --tag=CXX --mode=compile g++ $(CPPFLAGS) $(BACULA_H) -c $(@:.lo=.c)
+
+pgsql: Makefile pgsql-fd.la pgsql-archlog pgsql-restore
+
+$(PGSQLOBJ): Makefile $(PGSQLSRC)
+	@echo "Compiling PGSQL $(@:.lo=.c) ..."
+	@glibtool --silent --tag=CXX --mode=compile g++ $(CPPFLAGS) $(BACULA_H) $(DB_H) -c $(@:.lo=.c)
+
+pgsql-fd.la: pgsql-fd.lo keylist.lo parseconfig.lo pluglib.lo utils.lo
+	@echo "Building PGSQL $(@:.la=.so) ..."
+	@glibtool --silent --tag=CXX --mode=link g++ -shared $(LDFLAGS) $^ -o $@ -rpath $(plugindir) -module \
+		-export-dynamic -avoid-version $(DB_LIBS)
+
+pgsql-archlog: pgsql-archlog.lo parseconfig.lo keylist.lo pgsqllib.lo utils.lo pluglib.lo
+	@echo "Making $@ ..."
+	@glibtool --silent --tag=CXX --mode=link g++ -o $@ $^ $(BACULA_LIBS) $(DB_LIBS)
+
+pgsql-restore: pgsql-restore.lo parseconfig.lo keylist.lo pgsqllib.lo utils.lo pluglib.lo
+	@echo "Making $@ ..."
+	@glibtool --silent --tag=CXX --mode=link g++ -o $@ $^ $(BACULA_LIBS) $(DB_LIBS)
+
+pgsql-clean:
+	@echo "Cleaning pgsql ..."
+	@rm -f pgsql-archlog pgsql-restore pgsql-fd.dylib pgsql-fd.la pgsql-fd.lo
+
+libtool-clean:
+	@echo "Cleaning libtool ..."
+	@rm -rf .libs _libs
+
+install-pgsql-fd: pgsql-fd.la install-pgsql-config
+	@echo "Installing plugin ... $(^:.la=.so)"
+	@mkdir -p $(DESTDIR)$(plugindir)
+	@glibtool --silent --tag=CXX --mode=install ginstall -c -m 0750 $^ $(DESTDIR)$(plugindir)
+	@rm -f $(DESTDIR)$(plugindir)/$^
+
+install-pgsql-utils: pgsql-archlog pgsql-restore install-pgsql-config
+	@echo "Installing utils ... $^"
+	@mkdir -p $(DESTDIR)$(sbindir)
+	@glibtool --silent --tag=CXX --mode=install ginstall -c -m 0755 $^ $(DESTDIR)$(sbindir)
+
+install-pgsql-config: pgsql.conf
+	@echo "Installing config ... $^"
+	@mkdir -p $(DESTDIR)$(confdir)
+	@glibtool --silent --tag=CXX --mode=install ginstall -c -m 0640 pgsql.conf $(DESTDIR)$(confdir)
+
+install-pgsql: install-pgsql-fd install-pgsql-utils 
+
+install: install-pgsql

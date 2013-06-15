@@ -1,0 +1,2 @@
+/* #define FDAPI 2041 */
+#define FDAPI FD_PLUGIN_INTERFACE_VERSION
