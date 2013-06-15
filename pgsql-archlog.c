@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 by Inteos sp. z o.o.
+ * Copyright (c) 2013 by Inteos sp. z o.o.
  * All rights reserved. See LICENSE.pgsql for details.
  * 
  * Utility tool is used for performing PostgreSQL WAL files archiving according to supplied
@@ -7,7 +7,7 @@
  * permissions.
  */
 /*
-   To enable WAL Archiving you should do the folliwing:
+   To enable WAL Archiving you should do the following:
    in postgresql.conf
    - enable archive_mode = on
    - set up an archive_command = '/usr/local/bacula/sbin/pgsql-archlog -c <config.file> %f %p'

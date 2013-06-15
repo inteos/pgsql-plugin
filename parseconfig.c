@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 by Inteos sp. z o.o.
+ * Copyright (c) 2013 by Inteos sp. z o.o.
  * All rights reserved. See LICENSE.Inteos for details.
  * 
  * Parseconfig utility functions are used for parsing simple configfile and prepare a key/value

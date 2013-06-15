@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2011 Inteos Sp. z o.o.
+ *  Copyright (c) 2013 Inteos Sp. z o.o.
  *  All right reserved. See LICENSE.pgsql for details.
  *
  * This is a Bacula plugin for making backup and restore of PostgreSQL database.

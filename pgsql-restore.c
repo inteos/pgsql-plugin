@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010 by Inteos sp. z o.o.
+ * Copyright (c) 2013 by Inteos sp. z o.o.
  * All rights reserved. See LICENSE.pgsql for details.
  * 
  * This is a bacula recovery tool for PostgreSQL database. It is designed to work both with

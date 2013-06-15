@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 by Inteos sp. z o.o.
+ * Copyright (c) 2013 by Inteos sp. z o.o.
  * All rights reserved. See LICENSE.pgsql for details.
  *
  * Common definitions and utility functions for pgsql plugin.
