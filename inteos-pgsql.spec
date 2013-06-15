@@ -6,7 +6,7 @@
 # TODO: merge all plugins into one spec file
 
 # basic defines for every build
-%define _release           2
+%define _release           3
 %define _version           2.1
 %define _beeversion	   6.2.1
 %define _packager Radoslaw Korzeniewski <radekk@inteos.pl>
