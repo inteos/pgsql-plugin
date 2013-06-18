@@ -15,7 +15,6 @@
 
 #include "bacula.h"
 #include "utils.h"
-#include "ipclib.h"
 
 /* definitions */
 
