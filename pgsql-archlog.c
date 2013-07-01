@@ -127,6 +127,12 @@ void print_help ( pgsqldata * pdata ){
            ">> you can check your setup with: pgsql-archlog -c <config> check <<\n" );
 }
 
+/*
+ * check environment setup
+ *
+ * checks if pgsql-archlog can perform transaction logs archiving with supplied
+ *  configuration parameters in pgsql.conf file.
+ */
 void check_env_setup ( pgsqldata * pdata ){
 
    char * archdest;
