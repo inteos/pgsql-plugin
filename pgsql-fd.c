@@ -577,7 +577,7 @@ bRC pg_internal_conn ( bpContext *ctx, const char * sql ){
       /* we have a successful production database connection, so execute sql */
       result = PQexec ( db, sql );
       exestatus = PQresultStatus ( result );
-      if ( exestatus != PGRES_TUPLES_OK || exestatus != PGRES_COMMAND_OK ){
+      if ( ! (exestatus == PGRES_TUPLES_OK || exestatus == PGRES_COMMAND_OK) ){
          /* TODO: add an errorlog display */
          PGERROR ("pg_internal_conn.pqexec failed!", sql, result);
          exit (bRC_Error);
@@ -647,6 +647,27 @@ bRC start_pg_backup ( bpContext *ctx ){
 
    sql = MALLOC ( SQLLEN );
    ASSERT_p ( sql );
+#if 0
+   /* catalog database connection */
+   err = catdbconnect ( ctx );
+   if ( err ){
+      return bRC_Error;
+   }
+
+   /* insert status in catalog */
+   snprintf ( sql, SQLLEN, "insert into pgsql_pgsql_backupdbs (client, status, blevel) values ('%s', '%i', '%i')",
+         search_key ( pdata->paramlist, "ARCHCLIENT" ),
+         status, 0 );
+
+   result = PQexec ( pdata->catdb, sql );
+   FREE ( sql );
+
+   if ( PQresultStatus ( result ) != PGRES_COMMAND_OK ){
+      abortprg ( pdata, EXITCATDBEINS, "CATDB: SQL insert error!" );
+   }
+
+   pgid = get_walid_from_catalog ( pdata );
+#endif
 
    snprintf ( sql, SQLLEN, "select pg_start_backup ('%s:%i')",
          search_key ( pinst->paramlist, "ARCHCLIENT" ),
