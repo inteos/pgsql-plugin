@@ -211,7 +211,7 @@ void logprg ( LOG_LEVEL_T level, const char * msg ){
          if ( start != end ){
             strncpy ( copy, start, end - start );
             copy [ end - start ] = '\0';
-            printf ( "%s %s\n", s, copy );         
+            printf ( "%s %s\n", s, copy );
          }
          start = end + 1;
       }
@@ -312,6 +312,8 @@ PGconn * catdbconnect ( keylist * paramlist ){
 
    status = PQstatus ( conndb );
    if ( status == CONNECTION_BAD ){
+      logprg ( LOGERROR, PQerrorMessage( conndb ) );
+      PQfinish ( conndb );
       return NULL;
    }
    /* check for schema version number */

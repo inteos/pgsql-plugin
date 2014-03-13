@@ -67,7 +67,7 @@ extern "C" {
 #define PLUGIN_LICENSE      "AGPLv3"
 #define PLUGIN_AUTHOR       "Inteos Sp. z o.o."
 #define PLUGIN_DATE         "April 2013"
-#define PLUGIN_VERSION      "2.1"
+#define PLUGIN_VERSION      "2.2"
 #define PLUGIN_DESCRIPTION  "PostgreSQL online backup and recovery plugin (c) Inteos Sp. z o.o."
 
 #define PLUGIN_INFO         "pgsql plugin: "
@@ -577,7 +577,7 @@ bRC pg_internal_conn ( bpContext *ctx, const char * sql ){
       /* we have a successful production database connection, so execute sql */
       result = PQexec ( db, sql );
       exestatus = PQresultStatus ( result );
-      if ( ! (exestatus == PGRES_TUPLES_OK || exestatus == PGRES_COMMAND_OK) ){
+      if ( !(exestatus == PGRES_TUPLES_OK || exestatus == PGRES_COMMAND_OK) ){
          /* TODO: add an errorlog display */
          PGERROR ("pg_internal_conn.pqexec failed!", sql, result);
          exit (bRC_Error);
