@@ -28,7 +28,7 @@ BACOBJ = $(BACSRC:.c=.lo)
 all: pgsql Makefile
 
 clean: libtool-clean pgsql-clean
-	@echo "Cleaning obects ..."
+	@echo "Cleaning objects ..."
 	@rm -rf *.o *.lo
 
 %.lo : %.c Makefile
