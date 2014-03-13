@@ -67,7 +67,7 @@ extern "C" {
 #define PLUGIN_LICENSE      "AGPLv3"
 #define PLUGIN_AUTHOR       "Inteos Sp. z o.o."
 #define PLUGIN_DATE         "April 2013"
-#define PLUGIN_VERSION      "2.1"
+#define PLUGIN_VERSION      "2.2"
 #define PLUGIN_DESCRIPTION  "PostgreSQL online backup and recovery plugin (c) Inteos Sp. z o.o."
 
 #define PLUGIN_INFO         "pgsql plugin: "

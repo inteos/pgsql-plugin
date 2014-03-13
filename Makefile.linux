@@ -89,5 +89,5 @@ install: install-pgsql
 package-pgsql: install-pgsql inteos-pgsql.spec
 	@echo "Package pgsql $(PGSQLVERSION) for Bacula $(BACULAVERSION)"
 	@tar cjvPf ../pgsql-$(PGSQLVERSION)_$(BACULAVERSION).tar.bz2 $(DESTDIR)$(confdir)/pgsql.conf.example $(DESTDIR)$(sbindir)/pgsql-archlog $(DESTDIR)$(sbindir)/pgsql-restore $(DESTDIR)$(plugindir)/pgsql-fd.so
-	@ cp ../pgsql-$(PGSQLVERSION)_$(BACULAVERSION).tar.bz2 /root/rpmbuild/SOURCES
+	@cp ../pgsql-$(PGSQLVERSION)_$(BACULAVERSION).tar.bz2 /root/rpmbuild/SOURCES
 	@rpmbuild -bb inteos-pgsql.spec
