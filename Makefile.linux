@@ -4,8 +4,8 @@
 
 # Flags & libs
 BACULASRC = bacula.enterprise.git
-BACULAVERSION = $(shell grep VERSION= ../$(BACULASRC)/bacula/Makefile|cut -f2 -d'=')
-PGSQLVERSION = $(shell grep PLUGIN_VERSION pgsql-fd.c|grep define|awk '{print $$3}')
+BACULAVERSION = $(shell /opt/bacula/bin/bconsole help 2>&1|grep Version:|awk '{print $$2}')
+PGSQLVERSION = $(shell grep PLUGIN_VERSION pgsql-fd.c|grep define|awk '{print $$3}'|sed 's/"//g')
 
 plugindir = /opt/bacula/plugins
 sbindir = /opt/bacula/bin

@@ -7,8 +7,8 @@
 
 # basic defines for every build
 %define _release           2
-%define _version           2.2
-%define _beeversion	   6.4.6
+%define _version  %(grep PLUGIN_VERSION pgsql-fd.c|grep define|awk '{print $3}'|sed 's/"//g')
+%define _beeversion %(/opt/bacula/bin/bconsole help 2>&1|grep Version:|awk '{print $2}')
 %define _packager Radoslaw Korzeniewski <radekk@inteos.pl>
 %define manpage_ext gz
 
