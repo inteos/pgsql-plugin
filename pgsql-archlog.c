@@ -310,11 +310,13 @@ int perform_copy_wal_file ( pgsqldata * pdata ){
 }
 
 /*
+ * gets information of walid from catalog database
+ * 
  * input:
- *  pdata - primary data
+ *    pdata - context data
  * output:
- *  >= 0 - vaule of id for selected wal and client
- *  < 0 - value not found
+ *    >= 0 - vaule of id for selected wal and client
+ *    < 0 - value not found
  */
 int get_walid_from_catalog ( pgsqldata * pdata ){
    
@@ -343,6 +345,8 @@ int get_walid_from_catalog ( pgsqldata * pdata ){
 }
 
 /*
+ * perform an insert of archival status into catalog
+ * 
  * input:
  *  pdata - primary data
  *  status - status number to insert into catdb
@@ -545,7 +549,7 @@ int perform_another_wal_archive ( pgsqldata * pdata, int pgid ){
 
 /*
  * input parameters:
- *    argv[0] [-c config_file ] <wal_filename> <full_path_to_wal_filename>
+ *    argv[0] -c config_file <wal_filename> <full_path_to_wal_filename>
  */
 int main(int argc, char* argv[]){
 

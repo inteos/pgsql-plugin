@@ -157,9 +157,7 @@ void remove_whitespaces (char * buf){
       if ( !instring && (isblank (*s1) || *s1 == '\r')){
          s2 = s1 + 1;
          len = strlen ( s2 );
-
-         memcpy ( s1, s2, len );
-
+         memmove ( s1, s2, len );
 //       printf ("-----------\n%s\n--------------\n", s1);
       } else
       if ( *s1 == '"' ){
@@ -170,11 +168,13 @@ void remove_whitespaces (char * buf){
          }
          s1++;
       }
-/*    else
+/*
+      else
       if ( *s1 == '\n' ){
 
       }
-*/    else {
+*/
+      else {
          s1++;
       }
    }
