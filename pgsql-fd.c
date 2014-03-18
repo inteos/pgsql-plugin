@@ -251,9 +251,10 @@ struct _pg_plug_inst {
 #define D3  100
 
 /* error in sql exec */
-#define PGERROR(msg,sql,result) \
+#define PGERROR(msg,sql,result,status) \
          DMSG2 ( ctx, D1, "%s (%s)\n", msg, sql); \
          JMSG2 ( ctx, M_ERROR, "%s (%s)\n", msg, sql); \
+         JMSG ( ctx, M_ERROR, "pg_res: %s\n", PQresStatus(status) ); \
          JMSG ( ctx, M_ERROR, "pg_err: %s\n", PQresultErrorMessage(result) );
 
 /*
@@ -503,12 +504,13 @@ bRC catdbconnect ( bpContext *ctx ){
  * out:
  *    bRC_OK - OK
  *    bRC_ERROR - Error
+ *    bRC_More - 
  */
 bRC pg_internal_conn ( bpContext *ctx, const char * sql ){
 
    PGconn * db;
    ConnStatusType status;
-   ExecStatusType exestatus;
+   ExecStatusType resstatus;
    PGresult * result;
    int pid = 0;
    struct stat st;
@@ -570,16 +572,16 @@ bRC pg_internal_conn ( bpContext *ctx, const char * sql ){
          DMSG0 ( ctx, D1, "pg_internal_conn.conndb failed!\n" );
          JMSG0 ( ctx, M_WARNING, "pg_internal_conn.conndb failed!\n" );
          /* not all goes ok so we have to raise it, but it is not a critical error,
-          * it should be covered by calling function */
+          * it should be handled by calling function */
          exit (bRC_More);
       }
 
       /* we have a successful production database connection, so execute sql */
       result = PQexec ( db, sql );
-      exestatus = PQresultStatus ( result );
-      if ( !(exestatus == PGRES_TUPLES_OK || exestatus == PGRES_COMMAND_OK) ){
+      resstatus = PQresultStatus ( result );
+      if ( !(resstatus == PGRES_TUPLES_OK || resstatus == PGRES_COMMAND_OK) ){
          /* TODO: add an errorlog display */
-         PGERROR ("pg_internal_conn.pqexec failed!", sql, result);
+         PGERROR ("pg_internal_conn.pqexec failed!", sql, result, resstatus);
          exit (bRC_Error);
       }
 
@@ -742,9 +744,11 @@ bRC get_wal_list ( bpContext *ctx ){
    result = PQexec ( pinst->catdb, sql );
    resstatus = PQresultStatus ( result );
    if ( resstatus != PGRES_TUPLES_OK ){
-      PGERROR ("get_wal_list.pqexec failed!",sql,result);
+      PGERROR ( "get_wal_list.pqexec failed!", sql, result, resstatus );
       return bRC_Error;
    }
+//   FREE ( sql );
+
    nr = PQntuples ( result );
    if ( nr ){
       for (int a = 0; a < nr; a++ ){
@@ -1336,6 +1340,7 @@ static bRC startBackupFile(bpContext *ctx, struct save_pkt *sp){
    char * buf;
    char * sql;
    PGresult * result;
+   ExecStatusType resstatus;
    char * filename;
    char * vfilename;
    struct stat file_stat;
@@ -1393,8 +1398,9 @@ static bRC startBackupFile(bpContext *ctx, struct save_pkt *sp){
          result = PQexec ( pinst->catdb, sql );
          FREE ( sql );
 
-         if ( PQresultStatus ( result ) != PGRES_COMMAND_OK ){
-            PGERROR ("startbackupfile.pqexec failed!", sql, result);
+         resstatus = PQresultStatus ( result );
+         if ( resstatus != PGRES_COMMAND_OK ){
+            PGERROR ( "startbackupfile.pqexec failed!", sql, result, resstatus );
             return bRC_Error;
          }
          DMSG2 ( ctx, D3, "filename=%s, vfilename=%s\n", filename, vfilename );
@@ -1481,6 +1487,7 @@ static bRC endBackupFile ( bpContext *ctx ){
    int err;
    char * sql;
    PGresult * result;
+   ExecStatusType resstatus;
 
    ASSERT_ctx_p;
    pinst = (pg_plug_inst *)ctx->pContext;
@@ -1497,8 +1504,9 @@ static bRC endBackupFile ( bpContext *ctx ){
          result = PQexec ( pinst->catdb, sql );
          FREE ( sql );
 
-         if ( PQresultStatus ( result ) != PGRES_COMMAND_OK ){
-            PGERROR ("endbackupfile.pqexec failed!",sql,result);
+         resstatus = PQresultStatus ( result );
+         if ( resstatus != PGRES_COMMAND_OK ){
+            PGERROR ( "endbackupfile.pqexec failed!", sql, result, resstatus );
             return bRC_Error;
          }
 
