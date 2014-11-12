@@ -6,9 +6,10 @@
 # TODO: merge all plugins into one spec file
 
 # basic defines for every build
-%define _release           2
+%define _release  2
 %define _version  %(grep PLUGIN_VERSION pgsql-fd.c|grep define|awk '{print $3}'|sed 's/"//g')
 %define _beeversion %(/opt/bacula/bin/bconsole help 2>&1|grep Version:|awk '{print $2}')
+%define _rhelversion el%(awk '{print $3}' /etc/redhat-release|cut -f1 -d'.')
 %define _packager Radoslaw Korzeniewski <radekk@inteos.pl>
 %define manpage_ext gz
 
@@ -21,7 +22,7 @@
 
 Summary: Bacula - The Network Backup Solution
 Name: bacula-inteos-pgsql-plugin
-Version: %{_version}_%{_beeversion}
+Version: %{_version}_%{_beeversion}.%{_rhelversion}
 Release: %{_release}
 Group: System Environment/Daemons
 License: AGPLv3
@@ -60,10 +61,11 @@ cd %{name}-%{_version}_%{_beeversion}
 tar xjvf $RPM_SOURCE_DIR/pgsql-%{_version}_%{_beeversion}.tar.bz2
 
 %install
+rm -rf $RPM_BUILD_ROOT
+mkdir -p $RPM_BUILD_ROOT
 cd $RPM_BUILD_ROOT
 mv $RPM_BUILD_DIR/%{name}-%{_version}_%{_beeversion}/opt $RPM_BUILD_ROOT
 export QA_RPATHS=$[ 0x0001|0x0010|0x0002 ]
-
 
 %files
 %config(noreplace) /opt/bacula/etc/pgsql.conf.example
